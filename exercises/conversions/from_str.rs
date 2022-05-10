@@ -11,7 +11,7 @@ struct Person {
     age: usize,
 }
 
-// I AM NOT DONE
+
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -23,9 +23,30 @@ struct Person {
 // 5. If while extracting the name and the age something goes wrong, an error should be returned
 // If everything goes well, then return a Result of a Person object
 
+#[derive(Debug)]
+struct ErrMsg(&'static str);
+impl std::fmt::Display for ErrMsg {
+     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+         write!(f, "{}", self.0)
+     }
+}
+impl std::error::Error for ErrMsg {}
+
 impl FromStr for Person {
     type Err = Box<dyn error::Error>;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len() == 0 {
+            return  Err(Box::new(ErrMsg("len of s is 0")));
+        }
+        let v = s.split(',').collect::<Vec<_>>();
+        if v.len() != 2 || v[0].len() == 0 {
+            return  Err(Box::new(ErrMsg("should only has 2 parts")));
+        }
+        if let Ok(age) = v[1].parse::<usize>() {
+            return Ok(Self{name: v[0].into(), age});
+        } else {
+            return  Err(Box::new(ErrMsg("age is not a number")));
+        }
     }
 }
 
